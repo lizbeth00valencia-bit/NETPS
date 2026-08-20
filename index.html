@@ -42,8 +42,8 @@
       border: 1px solid var(--border-color);
     }
 
-    .form-container img {
-      max-width: 14%;
+    .form-container img.logo {
+      max-width: 15%;
       height: auto;
       margin-bottom: 20px;
     }
@@ -258,7 +258,7 @@
 <body>
   
 <div class="form-container">
-    <img src="../img/2024__DG05_Logo Original.png" alt="Logo de la Empresa" class="logo">
+  <img src="../img/2024__DG05_Logo Original.png" alt="Logo de la Empresa" class="logo">
   <div class="header-section">
     <h2>Tu Opinión Nos Ayuda a Mejorar</h2>
     <p class="subtitle">Diligencie completamente los campos requeridos para el registro</p>
@@ -387,13 +387,14 @@
     <label style="font-size: 0.75rem; color: #64748b; margin-top: 15px; display: block; text-align: justify;">
       La información suministrada será tratada de manera confidencial y utilizada únicamente con fines de
       mejora de la calidad del servicio, de conformidad con la normativa vigente de protección de Datos personales. Sus datos no serán compartidos
-       con terceros sin autorización. Su opinión es fundamental para fortalecer nuestros procesos y brindar una mejor atención en salud.
+      con terceros sin autorización. Su opinión es fundamental para fortalecer nuestros procesos y brindar una mejor atención en salud.
     </label>
   </form>
 
 </div>
 
 <script>
+  // Control de Consecutivo Local (FMT-001, FMT-002...)
   function obtenerSiguienteFormato() {
     let consecutivoActual = localStorage.getItem('consecutivoNPS');
     
@@ -463,6 +464,7 @@
     });
   });
 
+  // Canvas de Firma
   const canvas = document.getElementById('sigCanvas');
   const ctx = canvas.getContext('2d');
   const inputFirma = document.getElementById('firma');
@@ -530,6 +532,7 @@
     hasSigned = false;
   });
 
+  // Envío del Formulario
   document.getElementById('evalForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
