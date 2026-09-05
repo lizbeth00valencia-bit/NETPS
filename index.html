@@ -543,7 +543,7 @@
     hasSigned = false;
   });
 
-  // Envío del Formulario
+ // Envío del Formulario
   document.getElementById('evalForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -558,12 +558,21 @@
     }
 
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyLxZ5e1XdKnFmagFLsozR3wgsgUemfc4iORDCiLTq8MW82ukYMgcN9Y8KmrP6VUtG0ag/exec';
-    const data = new URLSearchParams(new FormData(this));
+    
+    // Convertir el formulario a URLSearchParams de forma explícita
+    const formData = new FormData(this);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+      params.append(key, value);
+    }
 
     fetch(scriptURL, { 
       method: 'POST', 
       mode: 'no-cors', 
-      body: data 
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
     })
     .then(() => {
       alert('Registro guardado exitosamente.');
@@ -581,7 +590,3 @@
       alert('Error al enviar los datos.');
     });
   });
-</script>
-
-</body>
-</html>
