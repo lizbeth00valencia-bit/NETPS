@@ -66,13 +66,6 @@
       color: #64748b;
     }
 
-    .question {
-      margin-bottom: 10px;
-      font-size: 0.95rem;
-      color: #0062eb;
-      align-items: center;
-    }
-
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -433,7 +426,7 @@
 
   window.addEventListener('DOMContentLoaded', inicializarCamposAutomaticos);
 
-  // Validación en tiempo real para la Cédula (Solo dígitos)
+  // Restricción para que la Cédula acepte solo números
   const inputCedula = document.getElementById('cedula');
   inputCedula.addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
@@ -543,7 +536,7 @@
     hasSigned = false;
   });
 
- // Envío del Formulario
+  // Envío del Formulario
   document.getElementById('evalForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -559,20 +552,13 @@
 
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyLxZ5e1XdKnFmagFLsozR3wgsgUemfc4iORDCiLTq8MW82ukYMgcN9Y8KmrP6VUtG0ag/exec';
     
-    // Convertir el formulario a URLSearchParams de forma explícita
+    // Captura segura de FormData
     const formData = new FormData(this);
-    const params = new URLSearchParams();
-    for (const [key, value] of formData.entries()) {
-      params.append(key, value);
-    }
 
     fetch(scriptURL, { 
       method: 'POST', 
       mode: 'no-cors', 
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: params.toString()
+      body: formData 
     })
     .then(() => {
       alert('Registro guardado exitosamente.');
@@ -583,6 +569,7 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       hasSigned = false;
       
+      // Vuelve a llenar la fecha, hora y el nuevo Formato No. automáticamente
       inicializarCamposAutomaticos();
     })
     .catch(error => {
@@ -590,3 +577,7 @@
       alert('Error al enviar los datos.');
     });
   });
+</script>
+
+</body>
+</html>
