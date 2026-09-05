@@ -1,99 +1,587 @@
-// Ejecutar esta función UNA SOLA VEZ para configurar los encabezados en Google Sheets
-function setupSheet() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Respuestas de formulario 1") || ss.getSheets()[0];
-  
-  var encabezados = [
-    "Marca Temporal",
-    "Formato No.",
-    "Fecha",
-    "Hora",
-    "Nombre Completo",
-    "Cédula",
-    "Duración Servicio",
-    "Servicio Utilizado",
-    "Escala Emoji",
-    "Escala Numérica (NPS)",
-    "Motivo de Calificación",
-    "Firma Digital (URL)"
-  ];
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formato de Evaluación y Satisfacción</title>
+  <style>
+    :root {
+      --primary-color: #3f8cff;
+      --primary-hover: #0b5ed7;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #212529;
+      --border-color: #dee2e6;
+      --focus-ring: rgba(13, 110, 253, 0.25);
+    }
 
-  // Si la hoja está completamente vacía, agrega los encabezados con estilo corporativo
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(encabezados);
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+    }
+
+    body {
+      background-color: #e6f8ff;
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 12px;
+    }
+
+    .form-container {
+      background: var(--card-bg);
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 800px;
+      border: 1px solid var(--border-color);
+    }
+
+    .form-container img.logo {
+      max-width: 15%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    .header-section {
+      text-align: center;
+      margin-bottom: 28px;
+      border-bottom: 2px solid #f1f3f5;
+      padding-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    p.subtitle {
+      font-size: 0.92rem;
+      color: #64748b;
+    }
+
+    .question {
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      color: #0062eb;
+      align-items: center;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+      color: #334155;
+    }
+
+    .label1 {
+      display: block;
+      font-weight: 600;
+      font-size: 0.94rem;
+      color: #334155;
+      text-align: justify;
+      margin: 0 0 8px 0;
+      padding: 0;
+      width: 100%;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      background-color: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    /* Escala Emojis */
+    .emoji-scale {
+      display: grid;
+      grid-template-columns: repeat(11, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .emoji-card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 2px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .emoji-card:hover {
+      border-color: var(--primary-color);
+      background-color: #e7f1ff;
+    }
+
+    .emoji-card.selected {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .emoji-card .emoji {
+      font-size: 1.35rem;
+      display: block;
+    }
+
+    /* Escala Numérica */
+    .num-scale {
+      display: grid;
+      grid-template-columns: repeat(11, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .num-card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 2px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .num-card:hover {
+      border-color: var(--primary-color);
+      background-color: #e7f1ff;
+    }
+
+    .num-card.selected {
+      background-color: #212529;
+      color: white;
+      border-color: #212529;
+    }
+
+    /* Canvas Firma */
+    .signature-container {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #fff;
+      position: relative;
+    }
+
+    canvas {
+      width: 100%;
+      height: 140px;
+      display: block;
+      border-radius: 6px;
+      cursor: crosshair;
+    }
+
+    .signature-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 6px;
+    }
+
+    .btn-clear {
+      background: none;
+      border: none;
+      color: #dc3545;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+
+    .submit-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    @media (max-width: 650px) {
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+      .emoji-scale, .num-scale {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  
+<div class="form-container">
+  <img src="2024__DG05_Logo Original.png" alt="Logo de mi sitio web" width="150">
+  <div class="header-section">
+    <h2>Tu Opinión Nos Ayuda a Mejorar</h2>
+    <p class="subtitle">Diligencie completamente los campos requeridos para el registro</p>
+  </div>
+
+  <form id="evalForm">
     
-    var rangoEncabezado = sheet.getRange(1, 1, 1, encabezados.length);
-    rangoEncabezado
-      .setFontFamily("Century Gothic")
-      .setFontSize(10)
-      .setFontWeight("bold")
-      .setFontColor("#ffffff")
-      .setBackground("#1e293b")
-      .setHorizontalAlignment("center")
-      .setVerticalAlignment("middle");
+    <div class="grid-3">
+      <div class="form-group">
+        <label for="formatoNo">Formato No:</label>
+        <input type="text" id="formatoNo" name="formatoNo" readonly required style="background-color: #e9ecef; cursor: not-allowed; font-weight: bold;">
+      </div>
 
-    sheet.setRowHeight(1, 30);
-    sheet.setFrozenRows(1);
+      <div class="form-group">
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" name="fecha" required>
+      </div>
+
+      <div class="form-group">
+        <label for="hora">Hora:</label>
+        <input type="time" id="hora" name="hora" required>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label for="cedula">Cédula de ciudadanía / Documento:</label>
+        <input type="text" id="cedula" name="cedula" inputmode="numeric" pattern="[0-9]*" placeholder="Ej. 1012345678" required>
+      </div>
+
+      <div class="form-group">
+        <label for="nombre">Nombre completo:</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ingrese nombre y apellido" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="duracion">Duración del servicio:</label>
+      <input type="text" id="duracion" name="duracion" placeholder="Ej. 45 min / 1 hora" required>
+    </div>
+
+    <div class="form-group">
+      <label for="servicio">Servicio utilizado:</label>
+      <select id="servicio" name="servicio" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-family: inherit;">
+        <option value="" disabled selected>Seleccione un servicio...</option>
+        <option value="Urgencias">Urgencias</option>
+        <option value="Transporte asistencial básico">Transporte asistencial básico</option>
+        <option value="Hospitalización">Hospitalización</option>
+        <option value="Laboratorio clínico">Laboratorio clínico</option>
+        <option value="Toma de muestras de lab. clínico">Toma de muestras de lab. clínico</option>
+        <option value="Servicio farmacéutico">Servicio farmacéutico</option>
+        <option value="Fisioterapia">Fisioterapia</option>
+        <option value="Rayos X / Tomografías">Rayos X / Tomografías</option>
+        <option value="Ecografías / Resonancias">Ecografías / Resonancias</option>
+        <option value="Gestión pre transfusional">Gestión pre transfusional</option>
+        <option value="Anestesiología">Anestesiología</option>
+        <option value="Cardiología">Cardiología</option>
+        <option value="Medicina general">Medicina general</option>
+        <option value="Medicina interna">Medicina interna</option>
+        <option value="Nutrición y dietética">Nutrición y dietética</option>
+        <option value="Ortopedia y/o traumatología">Ortopedia y/o traumatología</option>
+        <option value="Otorrinolaringología">Otorrinolaringología</option>
+        <option value="Psicología">Psicología</option>
+        <option value="Cirugía general">Cirugía general</option>
+        <option value="Cirugía ginecológica">Cirugía ginecológica</option>
+        <option value="Cirugía maxilofacial">Cirugía maxilofacial</option>
+        <option value="Cirugía ortopédica">Cirugía ortopédica</option>
+        <option value="Cirugía otorrinolaringología">Cirugía otorrinolaringología</option>
+        <option value="Cirugía plástica y estética">Cirugía plástica y estética</option>
+        <option value="Neurocirugía">Neurocirugía</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="label1">En una escala de 0 a 10, donde 0 significa "Nada probable" y 10 "Totalmente probable" marque. <br>
+        1. ¿Qué tan probable es que usted recomiende esta institución de salud a un familiar o amigo?
+      </label>
+      
+      <label>Escala Visual:</label>
+      <div class="emoji-scale" id="emojiScale">
+        <div class="emoji-card" data-index="0" data-emoji="🤬"><span class="emoji">🤬</span></div>
+        <div class="emoji-card" data-index="1" data-emoji="😡"><span class="emoji">😡</span></div>
+        <div class="emoji-card" data-index="2" data-emoji="😠"><span class="emoji">😠</span></div>
+        <div class="emoji-card" data-index="3" data-emoji="😟"><span class="emoji">😟</span></div>
+        <div class="emoji-card" data-index="4" data-emoji="🙁"><span class="emoji">🙁</span></div>
+        <div class="emoji-card" data-index="5" data-emoji="😐"><span class="emoji">😐</span></div>
+        <div class="emoji-card" data-index="6" data-emoji="😕"><span class="emoji">😕</span></div>
+        <div class="emoji-card" data-index="7" data-emoji="🙂"><span class="emoji">🙂</span></div>
+        <div class="emoji-card" data-index="8" data-emoji="😊"><span class="emoji">😊</span></div>
+        <div class="emoji-card" data-index="9" data-emoji="😀"><span class="emoji">😀</span></div>
+        <div class="emoji-card" data-index="10" data-emoji="🤩"><span class="emoji">🤩</span></div>
+      </div>
+      <input type="hidden" id="escalaEmoji" name="escalaEmoji" required>
+    </div>
+
+    <div class="form-group">
+      <label>Escala Numérica (0 a 10):</label>
+      <div class="num-scale" id="numScale">
+        <div class="num-card" data-num="0">0</div>
+        <div class="num-card" data-num="1">1</div>
+        <div class="num-card" data-num="2">2</div>
+        <div class="num-card" data-num="3">3</div>
+        <div class="num-card" data-num="4">4</div>
+        <div class="num-card" data-num="5">5</div>
+        <div class="num-card" data-num="6">6</div>
+        <div class="num-card" data-num="7">7</div>
+        <div class="num-card" data-num="8">8</div>
+        <div class="num-card" data-num="9">9</div>
+        <div class="num-card" data-num="10">10</div>
+      </div>
+      <input type="hidden" id="escalaNumero" name="escalaNumero" required>
+    </div>
+
+    <div class="form-group">
+      <label for="comentarios">Por favor, indíquenos la razón principal de la calificación otorgada:</label>
+      <textarea id="comentarios" name="comentarios" rows="3" placeholder="Escriba sus comentarios aquí..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Firma digital:</label>
+      <div class="signature-container">
+        <canvas id="sigCanvas"></canvas>
+      </div>
+      <div class="signature-actions">
+        <button type="button" class="btn-clear" id="btnClearSig">Limpiar firma</button>
+      </div>
+      <input type="hidden" id="firma" name="firma">
+    </div>
+
+    <button type="submit" class="submit-btn">Guardar Registro</button>
+    <label style="font-size: 0.75rem; color: #64748b; margin-top: 15px; display: block; text-align: justify;">
+      La información suministrada será tratada de manera confidencial y utilizada únicamente con fines de
+      mejora de la calidad del servicio, de conformidad con la normativa vigente de protección de Datos personales. Sus datos no serán compartidos
+      con terceros sin autorización. Su opinión es fundamental para fortalecer nuestros procesos y brindar una mejor atención en salud. Protegemos sus datos. La información suministrada será tratada de forma confidencial y segura, exclusivamente para las finalidades informadas y conforme a la normativa colombiana de protección de datos personales. Cuando corresponda, el uso de herramientas de Inteligencia Artificial (IA) se realizará bajo medidas de privacidad, seguridad y confidencialidad, de acuerdo con los lineamientos establecidos por la Superintendencia de Industria y Comercio (SIC). Sus datos no serán compartidos ni utilizados para fines no autorizados
+    </label>
+  </form>
+
+</div>
+
+<script>
+  // Control de Consecutivo Local (FMT-001, FMT-002...)
+  function obtenerSiguienteFormato() {
+    let consecutivoActual = localStorage.getItem('consecutivoNPS');
+    
+    if (!consecutivoActual) {
+      consecutivoActual = 1;
+    } else {
+      consecutivoActual = parseInt(consecutivoActual, 10);
+    }
+    
+    const codigoFormateado = 'FMT-' + String(consecutivoActual).padStart(3, '0');
+    document.getElementById('formatoNo').value = codigoFormateado;
   }
-}
 
-function doPost(e) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Respuestas de formulario 1") || ss.getSheets()[0];
-  
-  // Verificación e inserción automática de encabezados si no existen
-  if (sheet.getLastRow() === 0) {
-    setupSheet();
+  function incrementarConsecutivo() {
+    let consecutivoActual = localStorage.getItem('consecutivoNPS') || 1;
+    localStorage.setItem('consecutivoNPS', parseInt(consecutivoActual, 10) + 1);
   }
 
-  var params = e.parameter;
-  var urlFirma = "Sin firma";
+  function inicializarCamposAutomaticos() {
+    const ahora = new Date();
+    
+    obtenerSiguienteFormato();
 
-  // Calcular consecutivo automático basado en filas de datos (excluyendo encabezado)
-  var totalFilas = sheet.getLastRow(); 
-  var numeroConsecutivo = totalFilas; // La Fila 1 es el encabezado, por ende la primera respuesta es 1
-  
-  var codigoFormato = "FMT-" + ("00" + numeroConsecutivo).slice(-3);
+    const fechaISO = ahora.toISOString().split('T')[0];
+    document.getElementById('fecha').value = fechaISO;
 
-  // Procesar firma digital en Drive
-  if (params.firma && params.firma.indexOf("data:image") !== -1) {
-    try {
-      var folderName = "Firmas_Formularios";
-      var folders = DriveApp.getFoldersByName(folderName);
-      var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+    const horas = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+    document.getElementById('hora').value = `${horas}:${minutos}`;
+  }
 
-      var base64Data = params.firma.split(",")[1];
-      var blob = Utilities.newBlob(
-        Utilities.base64Decode(base64Data), 
-        "image/png", 
-        "Firma_" + codigoFormato + "_" + new Date().getTime() + ".png"
-      );
+  window.addEventListener('DOMContentLoaded', inicializarCamposAutomaticos);
 
-      var file = folder.createFile(blob);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      urlFirma = file.getUrl();
-    } catch (err) {
-      urlFirma = "Error al guardar imagen: " + err.toString();
+  // Validación en tiempo real para la Cédula (Solo dígitos)
+  const inputCedula = document.getElementById('cedula');
+  inputCedula.addEventListener('input', function (e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+
+  const emojiCards = document.querySelectorAll('.emoji-card');
+  const numCards = document.querySelectorAll('.num-card');
+  const inputEmoji = document.getElementById('escalaEmoji');
+  const inputNum = document.getElementById('escalaNumero');
+
+  function seleccionarEscala(val) {
+    emojiCards.forEach(c => c.classList.remove('selected'));
+    numCards.forEach(c => c.classList.remove('selected'));
+
+    const targetEmoji = document.querySelector(`.emoji-card[data-index="${val}"]`);
+    if (targetEmoji) {
+      targetEmoji.classList.add('selected');
+      inputEmoji.value = targetEmoji.getAttribute('data-emoji');
+    }
+
+    const targetNum = document.querySelector(`.num-card[data-num="${val}"]`);
+    if (targetNum) {
+      targetNum.classList.add('selected');
+      inputNum.value = val;
     }
   }
 
-  var cedula = params.cedula || "Sin cédula";
+  emojiCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const idx = card.getAttribute('data-index');
+      seleccionarEscala(idx);
+    });
+  });
 
-  // Guardar fila alineada con los encabezados
-  sheet.appendRow([
-    new Date(),
-    codigoFormato,
-    params.fecha,
-    params.hora,
-    params.nombre,
-    cedula,
-    params.duracion,
-    params.servicio,
-    params.escalaEmoji,
-    params.escalaNumero,
-    params.comentarios,
-    urlFirma
-  ]);
+  numCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const num = card.getAttribute('data-num');
+      seleccionarEscala(num);
+    });
+  });
 
-  return ContentService.createTextOutput("Éxito").setMimeType(ContentService.MimeType.TEXT);
-}
+  // Canvas de Firma
+  const canvas = document.getElementById('sigCanvas');
+  const ctx = canvas.getContext('2d');
+  const inputFirma = document.getElementById('firma');
+  const btnClear = document.getElementById('btnClearSig');
+  let isDrawing = false;
+  let hasSigned = false;
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000000';
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  setTimeout(resizeCanvas, 100);
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  function startDrawing(e) {
+    isDrawing = true;
+    hasSigned = true;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  }
+
+  function stopDrawing() {
+    if (isDrawing) {
+      isDrawing = false;
+      inputFirma.value = canvas.toDataURL();
+    }
+  }
+
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseleave', stopDrawing);
+
+  canvas.addEventListener('touchstart', startDrawing);
+  canvas.addEventListener('touchmove', draw);
+  canvas.addEventListener('touchend', stopDrawing);
+
+  btnClear.addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    inputFirma.value = '';
+    hasSigned = false;
+  });
+
+  // Envío del Formulario
+  document.getElementById('evalForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    if (!inputEmoji.value || !inputNum.value) {
+      alert('Por favor seleccione una opción en la escala.');
+      return;
+    }
+
+    if (!hasSigned) {
+      alert('Por favor ingrese su firma antes de enviar.');
+      return;
+    }
+
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyLxZ5e1XdKnFmagFLsozR3wgsgUemfc4iORDCiLTq8MW82ukYMgcN9Y8KmrP6VUtG0ag/exec';
+    const data = new URLSearchParams(new FormData(this));
+
+    fetch(scriptURL, { 
+      method: 'POST', 
+      mode: 'no-cors', 
+      body: data 
+    })
+    .then(() => {
+      alert('Registro guardado exitosamente.');
+      incrementarConsecutivo();
+      document.getElementById('evalForm').reset();
+      emojiCards.forEach(c => c.classList.remove('selected'));
+      numCards.forEach(c => c.classList.remove('selected'));
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasSigned = false;
+      
+      inicializarCamposAutomaticos();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al enviar los datos.');
+    });
+  });
+</script>
+
+</body>
+</html>
